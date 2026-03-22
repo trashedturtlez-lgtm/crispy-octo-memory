@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, products, productAssets, platformConfigs, productPricing, marketingContent, distributionHistory, InsertProduct, InsertProductAsset, InsertPlatformConfig, InsertProductPricing, InsertMarketingContent, InsertDistributionHistory } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,107 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Product queries
+export async function getUserProducts(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(products).where(eq(products.userId, userId));
+}
+
+export async function getProductById(productId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(products).where(eq(products.id, productId)).limit(1);
+  return result[0];
+}
+
+export async function createProduct(data: InsertProduct) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(products).values(data);
+  return result;
+}
+
+export async function updateProduct(productId: number, data: Partial<InsertProduct>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(products).set(data).where(eq(products.id, productId));
+}
+
+// Asset queries
+export async function getProductAssets(productId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(productAssets).where(eq(productAssets.productId, productId));
+}
+
+export async function createProductAsset(data: InsertProductAsset) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(productAssets).values(data);
+}
+
+// Platform config queries
+export async function getPlatformConfigs(productId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(platformConfigs).where(eq(platformConfigs.productId, productId));
+}
+
+export async function createPlatformConfig(data: InsertPlatformConfig) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(platformConfigs).values(data);
+}
+
+export async function updatePlatformConfig(configId: number, data: Partial<InsertPlatformConfig>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(platformConfigs).set(data).where(eq(platformConfigs.id, configId));
+}
+
+// Pricing queries
+export async function getProductPricing(productId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(productPricing).where(eq(productPricing.productId, productId)).limit(1);
+  return result[0];
+}
+
+export async function createProductPricing(data: InsertProductPricing) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(productPricing).values(data);
+}
+
+export async function updateProductPricing(pricingId: number, data: Partial<InsertProductPricing>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(productPricing).set(data).where(eq(productPricing.id, pricingId));
+}
+
+// Marketing content queries
+export async function getMarketingContent(productId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(marketingContent).where(eq(marketingContent.productId, productId));
+}
+
+export async function createMarketingContent(data: InsertMarketingContent) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(marketingContent).values(data);
+}
+
+// Distribution history queries
+export async function getDistributionHistory(productId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(distributionHistory).where(eq(distributionHistory.productId, productId));
+}
+
+export async function createDistributionRecord(data: InsertDistributionHistory) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(distributionHistory).values(data);
+}
